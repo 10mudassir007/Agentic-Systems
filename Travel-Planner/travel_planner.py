@@ -31,8 +31,8 @@ location = geocoder.ip('me')
 location = location.city + ", " + location.country
 today = datetime.date.today()
 
-os.environ['GROQ_API_KEY'] = st.sidebar.text_input("GROQ API KEY", type='password')
-os.environ['TAVILY_API_KEY'] = st.sidebar.text_input("TAVILY API KEY", type='password')
+os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
+os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
 
 tool = TavilySearchResults(max_results=3)
 
