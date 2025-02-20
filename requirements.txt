@@ -1,0 +1,9 @@
+langchain
+langchain-core
+langchain-groq
+langchain-community
+dotenv
+agno
+geocoder
+crewai
+langgraph
