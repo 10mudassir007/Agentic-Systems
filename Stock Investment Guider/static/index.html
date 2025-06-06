@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Investment Guider</title>
+    <style>
+        /* === Global Reset & Body Styling === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* === Main Layout Container === */
+        .container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* === Animated Background Elements === */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(0, 255, 157, 0.1), rgba(0, 123, 255, 0.1));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape1 { width: 100px; height: 100px; top: 20%; left: 10%; animation-delay: 0s; }
+        .shape2 { width: 150px; height: 150px; top: 60%; right: 15%; animation-delay: 2s; }
+        .shape3 { width: 80px; height: 80px; bottom: 20%; left: 20%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* === Sidebar Styling === */
+        .sidebar {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 0 50px rgba(0, 255, 157, 0.1);
+        }
+
+        .sidebar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #00ff9d, #007bff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* === Form Styling === */
+        .form-group {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: slideIn 0.6s ease-out forwards;
+        }
+
+        .form-group:nth-child(2) { animation-delay: 0.1s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.3s; }
+        .form-group:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00ff9d;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+            transform: translateY(-2px);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* === Button Styling === */
+        .show-stocks-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #00ff9d, #007bff);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .show-stocks-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 157, 0.4);
+        }
+
+        .show-stocks-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .show-stocks-btn.loading {
+            pointer-events: none;
+        }
+
+        .show-stocks-btn .btn-text {
+            transition: opacity 0.3s ease;
+        }
+
+        .show-stocks-btn.loading .btn-text {
+            opacity: 0;
+        }
+
+        .spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .show-stocks-btn.loading .spinner {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* === Main Content Area Styling === */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* === Welcome Screen Styling === */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .welcome-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none; /* Hide completely when not visible */
+        }
+
+        .welcome-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #00ff9d, #007bff);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 20px 40px rgba(0, 255, 157, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 500px;
+        }
+
+        /* === Results Section Styling === */
+        .results-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            /* Position at the top of the main content area */
+            position: relative;
+            top: 0;
+        }
+
+        .results-section.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: cardSlideIn 0.6s ease-out forwards;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card:nth-child(1) { animation-delay: 0.1s; }
+        .result-card:nth-child(2) { animation-delay: 0.3s; }
+        .result-card:nth-child(3) { animation-delay: 0.5s; }
+
+        @keyframes cardSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .strategy-icon {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .allocation-icon {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .return-icon {
+            background: linear-gradient(135deg, #45b7d1, #96c93d);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .card-content {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* === Streaming Text Styling === */
+        .streaming-text {
+            min-height: 1.5rem;
+            max-height: 200px; /* Limit height to prevent excessive card growth */
+            overflow-y: auto; /* Allow scrolling within the text area */
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+            scrollbar-width: thin; /* Thinner scrollbar for aesthetics */
+            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2rem;
+            background: #00ff9d;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* === Responsive Design === */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 1.5rem;
+            }
+            
+            .welcome-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation Elements -->
+    <div class="bg-animation">
+        <div class="floating-shape shape1"></div>
+        <div class="floating-shape shape2"></div>
+        <div class="floating-shape shape3"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar with Form Inputs -->
+        <div class="sidebar">
+            <h1>Stock Investment Guider</h1>
+            <p class="subtitle">AI-powered investment recommendations</p>
+            
+            <!-- User Interest Input -->
+            <div class="form-group">
+                <label for="interests">Your Interests</label>
+                <input type="text" id="interests" placeholder="e.g., Technology, Healthcare, Green Energy">
+            </div>
+            
+            <!-- Budget Input -->
+            <div class="form-group">
+                <label for="budget">Investment Budget</label>
+                <input type="number" id="budget" placeholder="10000" min="100">
+            </div>
+            
+            <!-- Risk Tolerance Selection -->
+            <div class="form-group">
+                <label for="risk">Risk Tolerance</label>
+                <select id="risk">
+                    <option value="">Select risk level</option>
+                    <option value="low">Low</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="high">High</option>
+                    <option value="very high">Very High</option>
+                </select>
+            </div>
+            
+            <!-- Submit Button -->
+            <button class="show-stocks-btn" onclick="generateStocks()">
+                <span class="btn-text">Show Stocks</span>
+                <div class="spinner"></div>
+            </button>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Results Section (Now positioned at the top) -->
+            <div class="results-section" id="resultsSection">
+                <!-- Investment Strategy Card -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <div class="card-icon strategy-icon">📊</div>
+                        <h3 class="card-title">Investment Strategy</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="streaming-text" id="strategyText"></div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Allocation Card -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <div class="card-icon allocation-icon">📈</div>
+                        <h3 class="card-title">Portfolio Allocation</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="streaming-text" id="allocationText"></div>
+                    </div>
+                </div>
+
+                <!-- Expected Returns Card -->
+                <div class="result-card">
+                    <div class="card-header">
+                        <div class="card-icon return-icon">💰</div>
+                        <h3 class="card-title">Expected Returns</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="streaming-text" id="returnText"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome Screen (Initially Visible) -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"/>
+                    </svg>
+                </div>
+                <h2 class="welcome-title">AI Investment Analysis</h2>
+                <p class="welcome-subtitle">Enter your preferences in the sidebar to get personalized stock recommendations powered by advanced AI agents</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Section -->
+    <script>
+        // API Configuration
+         const API_BASE_URL = 'http://localhost:8000';
+
+        async function generateStocks() {
+            const interests = document.getElementById('interests').value;
+            const budget = parseFloat(document.getElementById('budget').value);
+            const risk = document.getElementById('risk').value;
+
+            if (!interests || !budget || !risk) {
+                alert('Please fill in all fields before generating recommendations.');
+                return;
+            }
+
+            // Show loading state
+            const btn = document.querySelector('.show-stocks-btn');
+            btn.classList.add('loading');
+
+            // Hide welcome screen and show results
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('visible');
+
+            // Clear previous results
+            document.getElementById('strategyText').innerHTML = '';
+            document.getElementById('allocationText').innerHTML = '';
+            document.getElementById('returnText').innerHTML = '';
+            document.getElementById('strategyText').scrollTop = document.getElementById('strategyText').scrollHeight;
+            document.getElementById('allocationText').scrollTop = document.getElementById('allocationText').scrollHeight;
+            document.getElementById('returnText').scrollTop = document.getElementById('returnText').scrollHeight;
+
+            try {
+                // Start streaming from your FastAPI backend
+                const response = await fetch(`${API_BASE_URL}/stream-analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_interests: interests,
+                        budget: budget,
+                        risk_tolerance: risk
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                let strategyContent = '';
+                let allocationContent = '';
+                let returnContent = '';
+                let currentSection = '';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                
+                                switch (data.type) {
+                                    case 'status':
+                                        console.log('Status:', data.message);
+                                        break;
+                                    case 'strategy_start':
+                                        currentSection = 'strategy';
+                                        break;
+                                    case 'strategy':
+                                        strategyContent += data.content;
+                                        document.getElementById('strategyText').innerHTML = strategyContent + '<span class="typing-cursor"></span>';
+                                        break;
+                                    case 'strategy_end':
+                                        document.getElementById('strategyText').innerHTML = strategyContent;
+                                        break;
+                                    case 'allocation_start':
+                                        currentSection = 'allocation';
+                                        break;
+                                    case 'allocation':
+                                        allocationContent += data.content;
+                                        document.getElementById('allocationText').innerHTML = allocationContent + '<span class="typing-cursor"></span>';
+                                        break;
+                                    case 'allocation_end':
+                                        document.getElementById('allocationText').innerHTML = allocationContent;
+                                        break;
+                                    case 'return_start':
+                                        currentSection = 'return';
+                                        break;
+                                    case 'expected_return':
+                                        returnContent += data.content;
+                                        document.getElementById('returnText').innerHTML = returnContent + '<span class="typing-cursor"></span>';
+                                        break;
+                                    case 'return_end':
+                                        document.getElementById('returnText').innerHTML = returnContent;
+                                        break;
+                                    case 'complete':
+                                        console.log('Analysis complete!');
+                                        break;
+                                    case 'error':
+                                        throw new Error(data.message);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing streaming data:', e);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error generating recommendations. Please try again.');
+                
+                // Show fallback content
+                document.getElementById('strategyText').innerHTML = 'Unable to connect to the analysis service. Please check your connection and try again.';
+                document.getElementById('allocationText').innerHTML = 'Service temporarily unavailable.';
+                document.getElementById('returnText').innerHTML = 'Please try again later.';
+            } finally {
+                // Remove loading state
+                btn.classList.remove('loading');
+            }
+        }
+
+        function streamText(elementId, text, speed = 50) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+            
+            let i = 0;
+            const cursor = '<span class="typing-cursor"></span>';
+            
+            function typeWriter() {
+                if (i < text.length) {
+                    element.innerHTML = text.substr(0, i + 1) + cursor;
+                    i++;
+                    setTimeout(typeWriter, speed);
+                } else {
+                    // Remove cursor when done
+                    element.innerHTML = text;
+                }
+            }
+            
+            typeWriter();
+        }
+
+        // Add input validation and real-time feedback
+        document.getElementById('budget').addEventListener('input', function(e) {
+            const value = parseInt(e.target.value);
+            if (value < 100 && value > 0) {
+                e.target.style.borderColor = '#ff6b6b';
+            } else {
+                e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            }
+        });
+
+        // Add enter key support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                generateStocks();
+            }
+        });
+    </script>
+</body>
+</html>
