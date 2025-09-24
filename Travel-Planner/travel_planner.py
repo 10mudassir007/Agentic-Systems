@@ -11,13 +11,16 @@ from langchain.agents import create_react_agent, AgentExecutor
 import streamlit as st
 load_dotenv()
 
+
+st.title("Travel Planner")
+
 query = st.text_input("Query",label_visibility='collapsed',placeholder="Plan a 3-day trip to paris")
 b = st.button("Enter")
 location = geocoder.ip('me')
 location = location.city + ", " + location.country
 today = datetime.date.today()
 
-st.title("Travel Planner")
+
 
 os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
 os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
@@ -193,5 +196,6 @@ if b:
     final_plan = final_agent(query)
     st.write_stream(generate(final_plan))
     
+
 
 
