@@ -11,20 +11,6 @@ from langchain.agents import create_react_agent, AgentExecutor
 import streamlit as st
 load_dotenv()
 
-html_content = '''
-<div style="display: flex; align-items: center;">
-  <h1>Personalized Travel Planner</h1>
-  <a href="https://groq.com" target="_blank" rel="noopener noreferrer" style="margin-left: 10px;">
-    <img
-      src="https://groq.com/wp-content/uploads/2024/03/PBG-mark1-color.svg"
-      alt="Powered by Groq for fast inference."
-      style="width: 120px; height: auto;"
-    />
-  </a>
-</div>
-'''
-st.markdown(html_content,unsafe_allow_html=True)
-
 query = st.text_input("Query",label_visibility='collapsed',placeholder="Plan a 3-day trip to paris")
 b = st.button("Enter")
 location = geocoder.ip('me')
@@ -205,3 +191,4 @@ if b:
     final_plan = final_agent(query)
     st.write_stream(generate(final_plan))
     
+
