@@ -107,7 +107,7 @@ def hotel_agent(query : str):
     Question: {input}
     Thought:{agent_scratchpad}"""
 
-    llm_hotel = ChatGroq(model="qwen-2.5-32b")
+    llm_hotel = ChatGroq(model="openai/gpt-oss-120b")
     agent_hotel = create_react_agent(llm_hotel, tools, hotel_prompt)
 
     agent_hotel_ex = AgentExecutor(agent=agent_hotel, tools=tools, verbose=True,handle_parsing_errors=True)
@@ -148,7 +148,7 @@ def tour_agent(query: str):
     Question: {input}
     Thought:{agent_scratchpad}"""
 
-    llm_tourist = ChatGroq(model="qwen-2.5-32b")
+    llm_tourist = ChatGroq(model="openai/gpt-oss-120b")
     agent_tourist = create_react_agent(llm_tourist, tools, tourist_prompt)
 
     agent_tourist_ex = AgentExecutor(agent=agent_tourist, tools=tools, verbose=True,handle_parsing_errors=True)
@@ -196,6 +196,7 @@ if b:
     final_plan = final_agent(query)
     st.write_stream(generate(final_plan))
     
+
 
 
 
