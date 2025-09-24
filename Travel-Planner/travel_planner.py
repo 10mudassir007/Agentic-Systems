@@ -17,6 +17,8 @@ location = geocoder.ip('me')
 location = location.city + ", " + location.country
 today = datetime.date.today()
 
+st.title("Travel Planner")
+
 os.environ['GROQ_API_KEY'] = st.secrets['GROQ_API_KEY']
 os.environ['TAVILY_API_KEY'] = st.secrets['TAVILY_API_KEY']
 
@@ -191,4 +193,5 @@ if b:
     final_plan = final_agent(query)
     st.write_stream(generate(final_plan))
     
+
 
