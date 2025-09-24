@@ -66,7 +66,7 @@ def flight_agent(query: str):
     Question: {input}
     Thought:{agent_scratchpad}"""
 
-    llm_flight = ChatGroq(model="qwen-2.5-32b")
+    llm_flight = ChatGroq(model="openai/gpt-oss-120b")
 
     agent_flight = create_react_agent(llm_flight, tools, flight_prompt)
 
@@ -196,6 +196,7 @@ if b:
     final_plan = final_agent(query)
     st.write_stream(generate(final_plan))
     
+
 
 
 
