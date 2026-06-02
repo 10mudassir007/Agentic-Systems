@@ -1,0 +1,5 @@
+{
+  "graphs": {
+    "agent": "./agent_core.py:agent"
+  }
+}

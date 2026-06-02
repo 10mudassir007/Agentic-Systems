@@ -9,7 +9,7 @@ import json
 import re
 from typing import Dict, Any
 
-# Import your agent pipeline
+
 from agents import run_agent_pipeline
 
 app = FastAPI(title="Stock Investment Guider API", version="1.0.0")
@@ -132,6 +132,7 @@ async def serve_html():
 async def analyze_investment(request: InvestmentRequest):
     """Endpoint to get complete investment analysis (non-streaming)"""
     try:
+        print("Hello w")
         results = run_agent_pipeline(
             request.user_interests,
             request.budget,
@@ -150,11 +151,13 @@ async def analyze_investment(request: InvestmentRequest):
             }
         }
     except Exception as e:
+        print("Hello")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/stream-analyze")
 async def stream_analyze_investment(request: InvestmentRequest):
     """Endpoint for streaming investment analysis"""
+    print(request)
     try:
         return StreamingResponse(
             generate_investment_stream(
@@ -162,12 +165,8 @@ async def stream_analyze_investment(request: InvestmentRequest):
                 request.budget,
                 request.risk_tolerance
             ),
-            media_type="text/plain",
-            headers={
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-                "Content-Type": "text/event-stream",
-            }
+            media_type="text/event-stream",
+            
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -40,14 +40,10 @@ def create_initial_agent():
     - Each stock should be on its own line.
     - Try to include as much stocks as possible from the location specified above
     
+    You must answer in exactly one step. 
+    Do not generate multiple Thought/Action loops. 
     Now provide the list.
     """
-
-    # desc_1 = """
-    # This agent takes user-specific inputs including interests, risk tolerance, and location, then generates a curated list of 10 to 20 publicly traded companies with corresponding investment ranges and ticker symbols. The output is strictly formatted for downstream processing and avoids any explanatory or descriptive text. The agent's role is purely functional: extract relevant stock data using the given structured prompt and output it in the exact required format. 
-    # USE THE TOOL PROVIDED 
-    
-    # """
 
     expected_out_1 = """
     Company Name : Ticker : Investment Range
@@ -57,13 +53,12 @@ def create_initial_agent():
     """
 
     return Agent(
-        model=Groq(id="meta-llama/llama-4-maverick-17b-128e-instruct"),
-        tools=[TavilyTools(max_tokens=3000,)], 
-        show_tool_calls=True,
-        #description=desc_1,
+        model=Groq(id="openai/gpt-oss-20b"),
+        tools=[TavilyTools(max_tokens=1000,search_depth="basic")], 
         instructions=search_prompt,
         expected_output=expected_out_1,
-        markdown=True
+        markdown=True,
+        tool_call_limit=1
     )
 
 def create_filter_agent():
@@ -74,7 +69,7 @@ def create_filter_agent():
     Location: {user_location}
     Currency: {currency}
 
-    USE THE TOOL PROVIDED 
+    USE THE TOOL PROVIDED ONLY 
     
     From the above domains, perform the following:
 
@@ -99,14 +94,11 @@ def create_filter_agent():
     - Convert the currency to the user's location currency
     - Only Output the final answer no description, no steps
 
+    You must answer in exactly one step. 
+    Do not generate multiple Thought/Action loops. 
+
     Now return the filtered list.
     """
-
-    # filter_desc = """
-    # This agent processes a list of domain investment opportunities along with a user's budget and location. It filters out entries whose minimum investment exceeds the budget and normalizes currencies based on the user's location if needed. Then, using ROI metrics, it ranks the remaining options and selects the top 5 opportunities. The output is strictly formatted, with no extra text or commentary. Its purpose is to return a concise list suitable for direct downstream consumption by other agents, APIs, or UI components.
-    # USE THE TOOL PROVIDED 
-    
-    # """
 
     filter_out = """
     
@@ -118,13 +110,12 @@ def create_filter_agent():
     """
 
     return Agent(
-        model=Groq(id="meta-llama/llama-4-maverick-17b-128e-instruct"),
-        tools=[TavilyTools(max_tokens=3000,)], 
-        show_tool_calls=True,
-        #description=filter_desc,
+        model=Groq(id="openai/gpt-oss-20b"),
+        tools=[TavilyTools(max_tokens=1000,search_depth="basic")], 
         instructions=filter_inst,
         expected_output=filter_out,
-        markdown=True
+        markdown=True,
+        tool_call_limit=1
     )
 
 def create_final_agent():
@@ -134,7 +125,7 @@ def create_final_agent():
     Investment Budget: {investment_budget}
     Currency: {currency}
 
-    USE THE TOOL PROVIDED 
+    USE THE TOOL PROVIDED,
     
     USE USER SPECIFIED LOCATION'S CURRENCY
     
@@ -163,6 +154,9 @@ def create_final_agent():
     - No extra commentary, disclaimers, or metadata.
     - Use the full company names and keep the formatting clean and readable.
     
+    You must answer in exactly one step. 
+    Do not generate multiple Thought/Action loops. 
+    
     - Output only the final answer no description, no steps etc
     
         
@@ -182,44 +176,34 @@ def create_final_agent():
     Estimated Total Return: "{user_specified_currency}{Total Returns}"
     """
 
-    # final_desc = """
-    # This agent evaluates a list of filtered investment domains and a given investment budget. It analyzes the optimal way to distribute the user's capital across the stocks—whether through equal allocation, concentrated bets, or a hybrid approach—based on estimated ROI and risk balance. The output consists of a simple strategy label, a breakdown of allocation amounts per company, and a rough projected return range. The agent's role is to produce a clear, structured recommendation strictly following a predefined format, without commentary or deviation. Output only the final answer no description, no steps etc
-    # USE THE TOOL PROVIDED 
-    
-    # """
-
-    # final_out = """
-
-    # """
-
     return Agent(
-        model=Groq(id="meta-llama/llama-4-maverick-17b-128e-instruct"),
-        tools=[TavilyTools(max_tokens=3000,)], 
-        show_tool_calls=True,
-        #description=final_desc,
+        model=Groq(id="openai/gpt-oss-20b"),
+        tools=[TavilyTools(max_tokens=1000,search_depth="basic")], 
         instructions=final_inst,
-        #expected_output=final_out,
-        markdown=True
+        markdown=True,
+        tool_call_limit=1
     )
 
 def run_agent_pipeline(user_interests: str, budget: float, risk_tolerance: str):
     """
     Run the complete agent pipeline and return results
     """
+    print(user_interests, budget, risk_tolerance)
     location = get_user_location()
     
-    # Step 1: Get initial stock recommendations
     initial_agent = create_initial_agent()
+    print("[Pipeline] Running initial agent...")
     initial_agent_res = initial_agent.run(str({
         "user_interests": user_interests,
         "risk_tolerance": risk_tolerance,
         "location": location,
         "currency":currency
     }))
+    print("[Pipeline] Initial agent output:", initial_agent_res.content)
     domains = initial_agent_res.content
     
-    # Step 2: Filter stocks based on budget
     filter_agent = create_filter_agent()
+    print("[Pipeline] Running filter agent...")
     filter_agent_res = filter_agent.run(str({
         "budget": budget,
         "domains": domains,
@@ -228,14 +212,13 @@ def run_agent_pipeline(user_interests: str, budget: float, risk_tolerance: str):
     }))
     filtered_domains = filter_agent_res.content.split('\n\n')[-1]
     
-    # Step 3: Generate final allocation strategy
     final_agent = create_final_agent()
     final_agent_res = final_agent.run(str({
         "filtered_domains": filtered_domains,
         "investment_budget": budget,
         "currency":currency
     }))
-    
+    print("[Pipeline] Final agent output:", final_agent_res.content)
     return {
         "initial_stocks": domains,
         "filtered_stocks": filtered_domains,

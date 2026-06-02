@@ -1,0 +1,91 @@
+# ==============================================================================
+# Global Sub-Project Wildcards (Fixes nested project bleeding)
+# ==============================================================================
+**/__pycache__/
+**/*.py[cod]
+**/__marimo__/session/
+**/Browser-Automation-Agent/screenshots/
+**/*.png
+
+# ==============================================================================
+# Byte-compiled / optimized / DLL files
+# ==============================================================================
+*$py.class
+*.so
+
+# ==============================================================================
+# Distribution / packaging
+# ==============================================================================
+**/bin/
+**/build/
+**/develop-eggs/
+**/dist/
+**/downloads/
+**/eggs/
+**/.eggs/
+**/lib/
+**/lib64/
+**/parts/
+**/sdist/
+**/var/
+**/wheels/
+**/share/python-wheels/
+**/*.egg-info/
+**/.installed.cfg
+**/*.egg
+**/MANIFEST
+
+# ==============================================================================
+# Virtual Environments (Crucial to keep out of Git)
+# ==============================================================================
+**/.venv/
+**/venv/
+**/ENV/
+**/env/
+**/Pipfile.lock
+**/poetry.lock
+
+# ==============================================================================
+# Environment variables and secrets (NEVER commit these)
+# ==============================================================================
+**/.env
+**/.env.*
+**/.secret
+**/.secrets
+
+# ==============================================================================
+# Testing / Coverage / Linting reports
+# ==============================================================================
+**/htmlcov/
+**/.toml
+**/.html
+**/.txt
+**/.node_modules/
+**/.pytest_cache/
+**/.tox/
+**/.nox/
+**/.coverage
+**/.coverage.*
+**/.cache
+**/nosetests.xml
+**/coverage.xml
+**/*.cover
+**/*.py,cover
+**/.hypothesis/
+**/.ruff_cache/
+**/.mypy_cache/
+
+# ==============================================================================
+# IDEs and Editors
+# ==============================================================================
+**/.idea/
+**/.vscode/
+!**/.vscode/settings.json
+!**/.vscode/launch.json
+**/*.sublime-project
+**/*.sublime-workspace
+**/.ipynb_checkpoints
+
+# OS generated files
+**/.DS_Store
+**/Thumbs.db

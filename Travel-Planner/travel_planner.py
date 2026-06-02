@@ -17,7 +17,8 @@ st.title("Travel Planner")
 query = st.text_input("Query",label_visibility='collapsed',placeholder="Plan a 3-day trip to paris")
 b = st.button("Enter")
 location = geocoder.ip('me')
-location = location.city + ", " + location.country
+#location = location.city + ", " + location.country
+location = "Karachi, Pakistan"
 today = datetime.date.today()
 
 
@@ -53,7 +54,7 @@ def flight_agent(query: str):
 
     Question: the input question you must answer
     Thought: you should always think about what to do
-    Action: the action to take, should be one of [{tool_names}]
+    Action: the action to take, should be one of [{tools}]
     Action Input: the input to the action
     Observation: the result of the action
     ... (this Thought/Action/Action Input/Observation can run only once)
@@ -72,7 +73,7 @@ def flight_agent(query: str):
 
     agent_flight_ex = AgentExecutor(agent=agent_flight, tools=tools, verbose=True,handle_parsing_errors=True)
 
-    flights = agent_flight_ex.invoke({"input":query,"user_location":location,'todays_date':today})
+    flights = agent_flight_ex.invoke({"input":query,"user_location":location,'todays_date':today,"tools": tools,"tools": tools})
 
     return flights
 
@@ -94,7 +95,7 @@ def hotel_agent(query : str):
 
     Question: the input question you must answer
     Thought: you should always think about what to do
-    Action: the action to take, should be one of [{tool_names}]
+    Action: the action to take, should be one of [{tools}]
     Action Input: the input to the action
     Observation: the result of the action
     ... (this Thought/Action/Action Input/Observation can repeat only 1 time)
@@ -107,7 +108,7 @@ def hotel_agent(query : str):
     Question: {input}
     Thought:{agent_scratchpad}"""
 
-    llm_hotel = ChatGroq(model="qwen-2.5-32b")
+    llm_hotel = ChatGroq(model="openai/gpt-oss-120b")
     agent_hotel = create_react_agent(llm_hotel, tools, hotel_prompt)
 
     agent_hotel_ex = AgentExecutor(agent=agent_hotel, tools=tools, verbose=True,handle_parsing_errors=True)
@@ -135,7 +136,7 @@ def tour_agent(query: str):
 
     Question: the input question you must answer
     Thought: you should always think about what to do
-    Action: the action to take, should be one of [{tool_names}]
+    Action: the action to take, should be one of [{tools}]
     Action Input: the input to the action
     Observation: the result of the action
     ... (this Thought/Action/Action Input/Observation can repeat only 1 time)
@@ -148,7 +149,7 @@ def tour_agent(query: str):
     Question: {input}
     Thought:{agent_scratchpad}"""
 
-    llm_tourist = ChatGroq(model="qwen-2.5-32b")
+    llm_tourist = ChatGroq(model="openai/gpt-oss-120b")
     agent_tourist = create_react_agent(llm_tourist, tools, tourist_prompt)
 
     agent_tourist_ex = AgentExecutor(agent=agent_tourist, tools=tools, verbose=True,handle_parsing_errors=True)
@@ -177,7 +178,7 @@ def final_agent(query: str):
     """
     final_prompt = PromptTemplate.from_template(template)
 
-    final_agent = final_prompt | ChatGroq(model="deepseek-r1-distill-llama-70b")
+    final_agent = final_prompt | ChatGroq(model="openai/gpt-oss-120b")
 
     flights = flight_agent(query)
     hotels = hotel_agent(query)
@@ -196,6 +197,7 @@ if b:
     final_plan = final_agent(query)
     st.write_stream(generate(final_plan))
     
+
 
 
 
