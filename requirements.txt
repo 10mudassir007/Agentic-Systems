@@ -1,6 +1,7 @@
 langchain
 langchain-core
 langchain-groq
+langchain-google-genai
 langchain-community
 dotenv
 agno
