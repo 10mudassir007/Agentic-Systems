@@ -7,4 +7,5 @@ dotenv
 agno
 geocoder
 crewai
+tavily-python
 langgraph
