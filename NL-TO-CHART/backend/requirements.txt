@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pymysql
+pandas
+sqlglot
+langgraph
+langchain-anthropic
+python-dotenv
+pydantic
